@@ -1,0 +1,794 @@
+######################  UI PART FOR WEBPAGE   ##########################
+# Load data
+top_players_df <- read.csv("Top Players.csv")
+# Install and load officer package
+if (!require("officer")) {
+  install.packages("officer")
+  library(officer)
+}
+
+par_left <- function(x, y, left = 0, bottom = 0, width = 1, height = 1, ...) {
+  xleft <- x + left*width
+  ybottom <- y + bottom*height
+  xright <- xleft + width
+  ytop <- ybottom + height
+  par(xaxs = "i", yaxs = "i", mar = c(0, 0, 0, 0), new = TRUE, fig = c(xleft, xright, ybottom, ytop), ...)
+}
+
+
+add_picture <- function(img_path, width = 1, height = 1) {
+  if (file.exists(img_path)) {
+    img <- magick::image_read(img_path)
+    w <- as.integer(7 * width)
+    h <- as.integer(7 * height)
+    img <- magick::image_scale(img, paste0(w, "x", h, "!"))
+    grid::grid.raster(magick::image_data(img), interpolate = FALSE)
+  }
+}
+
+
+ui <- dashboardPage(
+  #############  DASHBOARD HEADER
+  dashboardHeader(
+    title = tags$h1("90 MINS STAT", style = "font-family: NEON LED Light; font-size: 29px; color: lime; padding: 2px 0; line-height: 0.25;"),
+    titleWidth = 230,
+    tags$li(
+      a(
+        href = "https://github.com/Mubashir42884",
+        target = "_blank",
+        style = "font-family: LEMON MILK;" ,
+        icon("github"),
+        "My GitHub"
+      ),
+      class = "dropdown"
+    ),
+    tags$li(
+      a(
+        href = "https://www.espnfc.com/",
+        target = "_blank",
+        style = "font-family: LEMON MILK;" ,
+        icon("futbol"),
+        "ESPN FC",
+        target = "_blank"
+      ),
+      class = "dropdown"
+    ),
+    tags$li(
+      a(
+        href = "https://www.foxsports.com/soccer",
+        style = "font-family: LEMON MILK;" ,
+        icon("tv"),
+        "Fox Sports Soccer"
+      ),
+      class = "dropdown"
+    )
+  ),
+  
+  #############  DASHBOARD SIDEBAR
+  dashboardSidebar(
+    tags$head(tags$style(
+      HTML(
+        "
+        /* Make the sidebar fixed and cover the full height of the page */
+        .sidebar {
+          position: fixed;
+          height: 100%;
+          overflow-y: none;
+        }
+
+        /* Remove the top margin from the first sidebar menu item */
+        .sidebar .treeview:first-child > a {
+          margin-top: 10;
+        }
+
+        /* Remove the sidebar's bottom margin */
+        .sidebar {
+          margin-bottom: 10;
+        }
+      "
+      )
+    )),
+    sidebarMenu(
+      menuItem(" About", tabName = "about", icon = icon("info-circle")),
+      menuItem(" Dataset", tabName = "dataset", icon = icon("database")),
+      menuItem(" Leagues", tabName = "leagues", icon = icon("futbol")),
+      menuItem(" Clubs", tabName = "clubs", icon = icon("people-group")),
+      menuItem(" Players", tabName = "players", icon = icon("user")),
+      menuItem(
+        " Comparisons",
+        tabName = "comparisons",
+        icon = icon("code-compare")
+      ),
+      menuItem(" Visuals", tabName = "visuals", icon = icon("chart-line"))
+    )
+  ),
+  
+  #############  DASHBOARD BODY
+  dashboardBody(
+    tabItems(
+      #################################### ABOUT
+      tabItem(
+        tabName = "about",
+        h2("About", style = "font-family: LEMON MILK;"),
+        p(
+          "This is a dashboard for exploring European Football data. The dataset has been collected by webscrapping using 'Rvest'. However, the main purpose of this dashboard is to show some real-time statistics of the European Football leagues, clubs and players. The dashboard might help you to get a good insight of the world of Football.",
+          style = "font-family: Quicksand; font-weight: bolder;"
+        ),
+        h4(
+          "Created by: MUBASHIR MOHSIN;",
+          br(),
+          "American International University-Bangladesh (AIUB)",
+          br(),
+          "Department: Computer Science",
+          align = "center",
+          style = "font-family: Quicksand; font-weight: bolder;"
+        ),
+        p(
+          br(),
+          br(),
+          "Copyright ⓒ 2023",
+          align = "center",
+          style = "font-family: Quicksand; font-weight: bolder;"
+        )
+      ),
+      #################################### DATASET
+      tabItem(
+        tabName = "dataset",
+        h2("Dataset", style = "font-family: LEMON MILK;"),
+        p("This dashboard uses the following datasets:", style = "font-family: Quicksand; font-weight: bolder;"),
+        sidebarMenu(
+          menuItem(
+            "Clubs Dataset",
+            tabName = "clubs_dataset",
+            icon = icon("shield")
+          ),
+          menuItem(
+            "Players Dataset",
+            tabName = "players_dataset",
+            icon = icon("people-group")
+          )
+        )
+      ),
+      ############################ CLUBS DATASET
+      tabItem(
+        tags$a(
+          href = "#",
+          icon("chevron-left"),
+          "Go back",
+          style = "font-family: Quicksand; font-weight: bolder;",
+          onclick = "history.back()"
+        ),
+        tabName = "clubs_dataset",
+        h2("Clubs Dataset", style = "font-family: LEMON MILK;"),
+        DTOutput("table1")
+      ),
+      ############################ PLAYERS DATASET
+      tabItem(
+        tags$a(
+          href = "#",
+          icon("chevron-left"),
+          "Go back",
+          style = "font-family: Quicksand; font-weight: bolder;",
+          onclick = "history.back()"
+        ),
+        tabName = "players_dataset",
+        h2("Players Dataset", style = "font-family: LEMON MILK;"),
+        DTOutput("table2")
+      ),
+      
+      
+      ################################## LEAGUES
+      
+      tabItem(
+        tabName = "leagues",
+        h2("Leagues", style = "font-family: LEMON MILK;"),
+        p("Explore data by league here.", style = "font-family: Quicksand; font-weight: bolder;"),
+        
+        # League Information sub-item
+        tabsetPanel(
+          tabPanel(
+            "League Information",
+            style = "font-family: Quicksand; font-weight: bolder; font-size: 20px",
+            fluidRow(
+              column(
+                2,
+                img(
+                  src = "https://logowik.com/content/uploads/images/premier-league3330.jpg",
+                  height = 70,
+                  width = 80
+                )
+              ),
+              column(
+                4,
+                tags$a(href = "https://en.wikipedia.org/wiki/Premier_League", "English Premier League", target =
+                         "_blank")
+              ),
+              column(
+                2,
+                img(
+                  src = "https://assets.laliga.com/assets/logos/laliga-v/laliga-v-1200x1200.jpg",
+                  height = 80,
+                  width = 80
+                )
+              ),
+              column(
+                4,
+                tags$a(href = "https://en.wikipedia.org/wiki/La_Liga", "La Liga", target =
+                         "_blank")
+              )
+            ),
+            fluidRow(
+              column(
+                2,
+                img(
+                  src = "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Serie_A_logo_2022.svg/1193px-Serie_A_logo_2022.svg.png",
+                  height = 80,
+                  width = 80
+                )
+              ),
+              column(
+                4,
+                tags$a(href = "https://en.wikipedia.org/wiki/Serie_A", "Serie A", target =
+                         "_blank")
+              ),
+              column(
+                2,
+                img(
+                  src = "https://upload.wikimedia.org/wikipedia/en/thumb/d/df/Bundesliga_logo_%282017%29.svg/1200px-Bundesliga_logo_%282017%29.svg.png",
+                  height = 80,
+                  width = 80
+                )
+              ),
+              column(
+                4,
+                tags$a(href = "https://en.wikipedia.org/wiki/Bundesliga", "Bundesliga", target =
+                         "_blank")
+              )
+            ),
+            fluidRow(
+              column(
+                2,
+                img(
+                  src = "https://i.pinimg.com/originals/cf/f8/6a/cff86adb4903caa1061e67b10334ff42.jpg",
+                  height = 90,
+                  width = 80
+                )
+              ),
+              column(
+                4,
+                tags$a(href = "https://en.wikipedia.org/wiki/Primeira_Liga", "Primeira Liga", target =
+                         "_blank")
+              ),
+              column(
+                2,
+                img(
+                  src = "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Eredivisie_nieuw_logo_2017-.svg/1200px-Eredivisie_nieuw_logo_2017-.svg.png",
+                  height = 60,
+                  width = 80
+                )
+              ),
+              column(
+                4,
+                tags$a(href = "https://en.wikipedia.org/wiki/Eredivisie", "Eredivisie", target =
+                         "_blank")
+              )
+            ),
+            fluidRow(column(
+              2,
+              img(
+                src = "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Ligue1.svg/1200px-Ligue1.svg.png",
+                height = 100,
+                width = 80
+              )
+            ),
+            column(
+              4,
+              tags$a(href = "https://en.wikipedia.org/wiki/Ligue_1", "Ligue 1", target =
+                       "_blank")
+            ))
+          )
+        )
+      ),
+      
+      ####################################### CLUBS
+      tabItem(
+        tabName = "clubs",
+        h2("Top Clubs of Europe", style = "font-family: LEMON MILK;"),
+        p(
+          "Here is listed all the top 5 clubs from each league of Europe.",
+          style = "font-family: Quicksand; font-weight: bolder;"
+        ),
+        fluidRow(column(width = 12,
+                        uiOutput("club_tabs")))
+      ),
+      ###################################### PLAYERS
+      
+      players_tab <- tabItem(
+        tabName = "players",
+        h2("Top Players of Europe", style = "font-family: LEMON MILK; font-weight: bold; text-align: center;"),
+        p("Here are the top 5 players from each league in Europe.",
+          style = "font-family: Quicksand; font-weight: bolder;"),
+        fluidRow(column(
+          width = 12,
+          uiOutput("player_tabs"),
+          tags$style(
+            HTML(
+              ".tab-pane h3 {font-family: LEMON MILK; font-weight: bold; text-align: center;}"
+            )
+          )
+        ))
+      ),
+      
+      ###################################### PLAYERS COMPARISON
+      comparisons_tab <- tabItem(
+        tabName = "comparisons",
+        h2("PLAYER COMPARISON", style = "font-family: LEMON MILK; font-weight: bold; text-align: center;"),
+        p(
+          "A comparative feature for players' statistics and performance.",
+          style = "font-family: Quicksand; font-weight: bolder; margin:30px;text-align: center;"
+        ),
+        fluidRow(column(
+          width = 12,
+          uiOutput("comparisons_tabs"),
+          tags$style(
+            HTML(
+              ".tab-pane h3 {font-family: LEMON MILK; font-weight: bold; text-align: center;}"
+            )
+          )
+        )),
+        div(
+          style = "font-family: Quicksand; font-size: 20px; text-align: center; display: flex; justify-content: center;",
+          uiOutput("player_images")
+          ), 
+        div(
+          style = "display: flex; justify-content: center;",
+          selectInput(
+            "player1_name",
+            "Select player 1:",
+            choices = unique(top_players_df$Player),
+            selected = NULL
+          ),
+          selectInput(
+            "player2_name",
+            "Select player 2:",
+            choices = unique(top_players_df$Player),
+            selected = NULL
+          )
+        ),
+        div(style = "font-family: Quicksand; font-size: 20px; text-align: center; display: flex; justify-content: center;",
+            fluidRow(column(
+              width = 12,
+              tableOutput("player_comparison_table")
+            )))
+        
+      ),  
+      
+      ####################################### VISUALS
+      tabItem(
+        tabName = "visuals",
+        h2("VISUAL PLOTS", style = "font-family: LEMON MILK; text-align: center"),
+        
+        fluidRow(
+          tabsetPanel(
+            id = "visualsTabset",
+            type = "tabs",
+            # Club Visuals tab
+            tabPanel(
+              style = "font-family: LEMON MILK; text-align: center",
+              "Club Visuals",
+              h4("Club Visuals", style = "font-family: LEMON MILK; text-align: center"),
+              plotOutput("clubPointsRatioPlot"),
+              plotOutput("successFactorPlot")
+            ),
+            # Player Visuals tab
+            tabPanel(
+              "Player Visuals",
+              h4("Player Visuals", style = "font-family: LEMON MILK; text-align: center"),
+              fluidRow(
+                column(
+                  width = 4,
+                  style = "text-align: center;",
+                  selectInput("player_select", label = "Select Player:", choices = players_df$Player),
+                  br(),
+                  tags$h4(id = "player_name", style = "font-family: LEMON MILK; font-weight: bold; text-align: center;"),
+                  br(),
+                  imageOutput("player_picture", width = "100%", height = "auto")
+                ),
+                column(
+                  width = 8,
+                  style = "text-align: center;",
+                  plotOutput("radar_plot")
+                )
+              )
+            )
+          )
+        )
+      )
+      ###############################################
+    )
+  )
+)
+
+###############################################################################
+
+
+
+############################# FUNCTIONS FOR OUTPUT #############################
+
+################################### FOR CLUBS OUTPUT
+
+# Load the club data
+club_data <- read.csv("Clubs.csv")
+
+# Create a data frame with only the necessary columns
+top_clubs <- club_data %>%
+  filter(Position >= 1 & Position <= 5) %>%
+  select(Club, LeagueNameLong, Points)
+
+# Create a list of data frames, one for each league
+league_clubs <- split(top_clubs, f = top_clubs$LeagueNameLong)
+
+# Define the order of the leagues
+league_order <-
+  c(
+    "English Premier League",
+    "Spanish La Liga",
+    "Italian Serie-A",
+    "German Bundesliga",
+    "French Ligue 1",
+    "Dutch Eredivisie",
+    "Portuguese Primeira Liga"
+  )
+
+
+
+###############################################################################
+
+
+
+
+################################# SERVER #######################################
+
+server <- function(input, output, session) {
+  ################################ FOR LEAGUES OUTPUT #########################
+  # Load data
+  output$table1 <- renderDT({
+    dataset1 <- read.csv("All Clubs Data.csv")
+    datatable(dataset1)
+  })
+  
+  output$table2 <- renderDT({
+    dataset2 <- read.csv("All Squad Data.csv")
+    datatable(dataset2)
+  })
+  
+  ################################### FOR CLUBS OUTPUT #########################
+  # Club Information sub-item
+  output$club_tabs <- renderUI({
+    lapply(league_order, function(league_name) {
+      tabPanel("",
+               style = "padding: 0;",
+               fluidRow(column(
+                 width = 12,
+                 h4(league_name, style = "text-align: center; font-weight: bolder;")
+               )),
+               fluidRow(column(width = 12,
+                               dataTableOutput(
+                                 paste0("table_", league_name)
+                               ))))
+    })
+  })
+  
+  # Output the club tables
+  lapply(league_order, function(league_name) {
+    output[[paste0("table_", league_name)]] <- renderDataTable({
+      datatable(
+        league_clubs[[league_name]][c("Club", "Points")],
+        rownames = FALSE,
+        options = list(
+          dom = 't',
+          paging = FALSE,
+          ordering = TRUE,
+          order = list(1, 'desc'),
+          searching = FALSE,
+          info = FALSE
+        )
+      )
+    },
+    options = list(dom = 't'))
+  })
+  
+  
+  ############################# FOR PLAYERS OUTPUT #############################
+  
+  # Read Top Players.csv into a dataframe
+  top_players_df <- read.csv("Top Players.csv")
+  
+  # Create a list of league names
+  leagues <- unique(top_players_df$LeagueNameLong)
+  
+  # Create a function to generate tableOutput for each league
+  generate_league_table <- function(league) {
+    # Filter top players by league
+    league_top_players_df <-
+      subset(top_players_df, LeagueNameLong == league)
+    
+    # Create table with league name as heading
+    league_table <- tableOutput(paste0("league_", league))
+    
+    div(
+      h4(league, style = "font-family: LEMON MILK; font-weight: bold; text-align: center; padding: 30px;"),
+      league_table,
+      renderTable(
+        league_top_players_df %>%
+          select(
+            Player,
+            Club,
+            NationalTeam,
+            Position,
+            Appearance,
+            TotalGoals,
+            TotalAssists,
+            ShotsOnTarget
+          ) %>%
+          arrange(desc(TotalGoals)),
+        outputId = paste0("top_players_", make.names(league))
+      )
+    )
+  }
+  
+  output$player_tabs <- renderUI({
+    tabs <- lapply(unique(top_players_df$LeagueNameLong), function(l) {
+      tabPanel(l,
+               generate_league_table(l))
+    })
+    do.call(tabsetPanel, tabs)
+  })
+  
+  # Render the tables for each league
+  lapply(unique(top_players_df$LeagueNameLong), function(l) {
+    output[[paste0("league_", make.names(l))]] <- renderTable({
+      top_players_df %>% filter(LeagueNameLong == l) %>%
+        select(
+          LeagueNameLong,
+          Player,
+          Club,
+          NationalTeam,
+          Position,
+          Appearance,
+          TotalGoals,
+          TotalAssists,
+          ShotsOnTarget
+        ) %>%
+        arrange(desc(TotalGoals))
+    })
+  })
+  
+  ## The Server part:-
+  
+  ############################# FOR 1V1 Comparisons ############################
+  
+  # Load data
+
+  # create the player comparison table
+  output$player_comparison_table <- renderTable({
+    # get the selected player names
+    player1 <- input$player1_name
+    player2 <- input$player2_name
+    
+    # get the selected columns for the selected players
+    player1_stats <-
+      top_players_df[top_players_df$Player == player1, c("Player",
+                                                         "Appearance",
+                                                         "TotalGoals",
+                                                         "TotalAssists",
+                                                         "ShotsOnTarget")]
+    player2_stats <-
+      top_players_df[top_players_df$Player == player2, c("Player",
+                                                         "Appearance",
+                                                         "TotalGoals",
+                                                         "TotalAssists",
+                                                         "ShotsOnTarget")]
+    
+    # combine the selected columns into one data frame
+    stats_df <- data.frame(
+      Player1 = c(
+        player1,
+        paste0(player1, " Appearance"),
+        paste0(player1, " TotalGoals"),
+        paste0(player1, " TotalAssists"),
+        paste0(player1, " ShotsOnTarget")
+      ),
+      Stats = c("Stats", "Appearance", "Goals", "Assists", "Shots On Target"),
+      Player2 = c(
+        player2,
+        paste0(player2, " Appearance"),
+        paste0(player2, " TotalGoals"),
+        paste0(player2, " TotalAssists"),
+        paste0(player2, " ShotsOnTarget")
+      )
+    )
+    
+    # add the selected stats to the data frame
+    stats_df$Player1_Stats <- as.character(player1_stats)
+    stats_df$Player2_Stats <- as.character(player2_stats)
+    
+    # set the column order
+    stats_df <-
+      stats_df[, c("Player1_Stats", "Stats", "Player2_Stats")]
+    
+    # remove column names
+    names(stats_df) <- c("", "", "")
+    
+    # return the formatted table
+    stats_df
+    
+  })
+  
+  # create the image links and display them
+  output$player_images <- renderUI({
+    player1 <- input$player1_name
+    player2 <- input$player2_name
+    
+    # Get the URLs for the selected players
+    player1_url <- top_players_df[top_players_df$Player == player1, "Pictures"]
+    player2_url <- top_players_df[top_players_df$Player == player2, "Pictures"]
+    
+    tagList(
+      div(
+        style = "display: flex; justify-content: center;",
+        img(src = player1_url, height = "100%", width = "200px", style = "margin-right: 20px;"),
+        img(src = player2_url, height = "100%", width = "200px", style = "margin-left: 20px;")
+      )
+    )
+  })
+  
+  ##############################################################################
+  
+  
+  ############################### GGPLOT VISUALS ###############################
+  
+  
+  ############################### CLUB VISUALS
+  # Read in data for Top Clubs plot
+  topClubData_df <- read.csv("Top Clubs.csv")
+  
+  # Club Points Ratio plot
+  output$clubPointsRatioPlot <- renderPlot({
+    ggplot(topClubData_df, aes(x = Club, y = pointsRatio)) +
+      geom_line(size = 2) + # Use geom_line instead of geom_bar
+      geom_point(size = 5, shape = 21, fill = "#9fc5e8") + # Add markers
+      geom_segment(aes(x = Club[which(pointsRatio == max(pointsRatio))], 
+                       xend = Club[which(pointsRatio == max(pointsRatio))],
+                       y = 0, yend = max(pointsRatio)), 
+                   linetype = "dashed", color = "#351c75") + # Add segment to highlight highest value
+      geom_segment(aes(x = Club[which(pointsRatio == sort(unique(pointsRatio), decreasing = TRUE)[2])], 
+                       xend = Club[which(pointsRatio == sort(unique(pointsRatio), decreasing = TRUE)[2])],
+                       y = 0, yend = sort(unique(pointsRatio), decreasing = TRUE)[2]), 
+                   linetype = "dotted", color = "#b4a7d6") + # Add segment to highlight 2nd highest value
+      geom_segment(aes(x = Club[which(pointsRatio == sort(unique(pointsRatio), decreasing = TRUE)[3])], 
+                       xend = Club[which(pointsRatio == sort(unique(pointsRatio), decreasing = TRUE)[3])],
+                       y = 0, yend = sort(unique(pointsRatio), decreasing = TRUE)[3]), 
+                   linetype = "dotdash", color = "#990000") + # Add segment to highlight 3rd highest value
+      labs(
+        x = "Club",
+        y = "Points Ratio",
+        title = bquote(bold(
+          "Points Ratio of Top Clubs", '\n', atop("", "")
+        )),
+        size = 18,
+        bold = TRUE
+      ) +
+      theme(
+        axis.text.x = element_text(
+          angle = 90,
+          vjust = 1,
+          hjust = 1
+        ),
+        axis.text = element_text(size = 12, face = "bold")
+      ) +
+      scale_linetype_manual(values=c("dashed", "dotted", "dotdash"), 
+                            labels=c("1st", "2nd", "3rd"),
+                            name="Top Clubs")
+    
+    
+  })
+  
+  
+  # Success Factor plot
+  output$successFactorPlot <- renderPlot({
+    
+    ggplot(topClubData_df, aes(
+      x = Club,
+      y = successFactor,
+      fill = factor(successFactor)
+    )) +
+      geom_bar(stat = "identity") +
+      labs(
+        x = "Club",
+        y = "Success Factor",
+        title = bquote(bold(
+          "Success Factor of Top Clubs", '\n', atop("", "")
+        )),
+        size = 18,
+        bold = TRUE
+      ) +
+      scale_fill_manual(values = c(
+        "#990000",
+        "#674ea7",
+        "#ffc000",
+        "#9aec77",
+        "#3d85c6",
+        "#910657",
+        "#45818e"
+      )) +
+      theme(
+        axis.text.x = element_text(
+          angle = 90,
+          vjust = 1,
+          hjust = 1
+        ),
+        axis.text = element_text(size = 12, face = "bold")
+      ) +
+      guides(fill = guide_legend(title = "Success Factor"))
+    
+  })
+  
+  # PLAYER VISUALS
+  
+  output$radar_plot <- renderPlot({
+    req(input$player_select)
+    player <- players_df %>% filter(Player == input$player_select)
+    
+    if (nrow(player) == 0) {
+      return("Player not found in the dataset.")
+    }
+    
+    player_data <- player[, c("Player", "Saves", "Goals", "Assist", "Shots", "OnTarget", "Conceded", "Foul", "Fouled", "YC", "RC", "SUB")]
+    player_data_long <- gather(player_data, key = "stats", value = "value", -Player)
+    
+    p <- 
+      
+      ggplot(data = player_data_long, aes(
+        x = stats,
+        y = value,
+        group = Player,
+        color = Player
+      )) +
+      geom_polygon(aes(fill = Player), alpha = 0.5) +
+      geom_line() +
+      geom_point() +
+      coord_polar() +
+      theme_void() +
+      scale_fill_manual(values = c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", 
+                                   "#D55E00", "#CC79A7", "#000000")) +
+      
+      scale_color_manual(values = c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", 
+                                    "#D55E00", "#CC79A7", "#000000")) +
+      
+      scale_x_discrete(labels = c("Saves", "Goals", "Assist", "Shots", "On Target", "Conceded", 
+                                  "Foul", "Fouled", "Yellow Cards", "Red Cards", "Substitutions")) +
+      labs(title = input$player_select, x = "STATS", y = "VALUES")
+    
+    p
+  })
+  
+  output$player_picture <- renderImage({
+    req(input$player_select)
+    player <- players_df %>% filter(Player == input$player_select)
+    
+    if (nrow(player) == 0) {
+      return(NULL)
+    }
+    
+    image_url <- player$Pictures
+    
+    list(src = image_url, width = "100%", height = "auto")
+  }, deleteFile = FALSE)
+  
+
+  ##############################################################################
+}
+
+#############  SHINY APP
+shinyApp(ui, server)
