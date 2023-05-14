@@ -4,25 +4,25 @@
 Web Page Screenshots:
 
 ABOUT
-![Not available](https://ibb.co/X4XdM1k)
+![Not available](https://i.ibb.co/hMsnwb1/Screenshot-545.png)
 
 DATASET
-![Not available](https://ibb.co/qg9LfJm)
-![Not available](https://ibb.co/9cyx2Jq)
+![Not available](https://i.ibb.co/rF5BMgZ/Screenshot-546.png)
+![Not available](https://i.ibb.co/s1QpGWs/Screenshot-547.png)
 
 LEAGUES INFORMATION
-![Not available](https://ibb.co/YWyRpjx)
+![Not available](https://i.ibb.co/ZJYLWT0/Screenshot-548.png)
 
 TOP EUROPEAN LEAGUE POINTS TABLE
-![Not available](https://ibb.co/zxWyrGD)
+![Not available](https://i.ibb.co/kBVRxQv/Screenshot-549.png)
 
-TOP EUROPEAN LEAGUE PLAYERS TABLE
-![Not available](https://ibb.co/QJ73w1z)
+TOP EUROPEAN LEAGUE TOP PLAYERS TABLE
+![Not available](https://i.ibb.co/FhkLTjN/Screenshot-550.png)
 
 PLAYER COMPARISONS (1 v 1)
-![Not available](https://ibb.co/LzL650J)
-![Not available](https://ibb.co/NpBHFFw)
-![Not available](https://ibb.co/PGq7G2S)
+![Not available](https://i.ibb.co/VW7DmLQ/Screenshot-551.png)
+![Not available](https://i.ibb.co/rMr1QQn/Screenshot-552.png)
+![Not available](https://i.ibb.co/TM9VMQC/Screenshot-553.png)
 
 VISUAL PLOTTING
-![Not available](https://ibb.co/pw5dy1d)
+![Not available](https://i.ibb.co/g9hJVrJ/Screenshot-554.png)
